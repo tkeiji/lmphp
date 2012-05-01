@@ -1,6 +1,5 @@
 <?php
 	$today = new DateTime();
-	$today->setTime(8, 10, 0);
 	print('Current Time = ');
     print( $today->format('Y/m/d H:i:s') );	
 	print('<br>');
