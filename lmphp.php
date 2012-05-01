@@ -1,23 +1,51 @@
 <?php
 	$today = new DateTime();
+	$today->setTime(8, 10, 0);
 	print('Current Time = ');
     print( $today->format('Y/m/d H:i:s') );	
 	print('<br>');
-	$bustime = $today;
-    print('--reg bus--<br>');
-	$fp = fopen("regbustable.txt", "r");
-    while ( !feof($fp) ){
-    	$line = fgets($fp);
-    	$stime = split(" ", $line);
-    	foreach( $stime as $eachtime){
-    		$stime = split(":", $eachtime);
-    		print("Hour = $stime[0], Min = $stime[1]"); 
-    		print ( "<br>" );
-    		$bustime->setTime($stime[0], $stime[1], 0);
-    		print("bustime= $bustime->format('H:i:s')<br>");
-    	}
-    }
+    print('-----<br>');
+	$bustimearray = array();
+	
+	function readf( $filename ){
+		global $today;
+		global $bustimearray;
+		$fp = fopen( $filename, "r");
+		while ( !feof($fp) ){
+    		$line = fgets($fp);
+    		$stime = split(" ", $line);
+    		foreach( $stime as $eachtime){
+    			$stime = split(":", $eachtime);
+				$bustime = clone $today;
+    			$bustime->setTime($stime[0], $stime[1], 0);
+    			array_push($bustimearray, $bustime);
+    		} // foreach
+    	} // while
+	} // function
+		
+	$i=0;
+	readf( 'regbustable.txt' );
+	readf( 'twinbustable.txt' );
 
-    fclose($fp);    
+	asort( $bustimearray );
+
+	$next = false;
+	foreach( $bustimearray as $eachbustime ){
+		$diff = $today->getTimestamp()- $eachbustime->getTimestamp();
+		$diff = $diff / 60;
+		
+		if ( ($diff <=  10) &&  ($diff >= -30)  ){
+			if( $next == false ){
+				if( $today < $eachbustime ){
+					$next = true;
+					print("---NOW---<br>");
+				} //if 
+			}//if
+			echo $eachbustime->format(' H:i:s');
+			print("<br>");
+		} //if
+	} //foreach
+
+    fclose($fp);
+
 ?>
-
